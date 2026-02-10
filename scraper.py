@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 import re
 import string
 from collections import Counter
@@ -110,13 +111,13 @@ def main():
     )
     parser.add_argument(
         "--client-id",
-        required=True,
-        help="Reddit app client ID",
+        default=os.environ.get("REDDIT_CLIENT_ID"),
+        help="Reddit app client ID (or set REDDIT_CLIENT_ID env var)",
     )
     parser.add_argument(
         "--client-secret",
-        required=True,
-        help="Reddit app client secret",
+        default=os.environ.get("REDDIT_CLIENT_SECRET"),
+        help="Reddit app client secret (or set REDDIT_CLIENT_SECRET env var)",
     )
     parser.add_argument(
         "--user-agent",
@@ -151,6 +152,12 @@ def main():
         help="Write full frequency counts to a JSON file",
     )
     args = parser.parse_args()
+
+    if not args.client_id or not args.client_secret:
+        parser.error(
+            "Reddit credentials required. Pass --client-id/--client-secret "
+            "or set REDDIT_CLIENT_ID/REDDIT_CLIENT_SECRET env vars."
+        )
 
     print(f"Scraping r/{args.subreddit} ({args.sort}, limit={args.limit}) ...")
     freq = scrape_subreddit(
